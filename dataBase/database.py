@@ -35,6 +35,8 @@ def crear_usuario_inicial(chat_id):
     conexion = obtener_conexion()
     if conexion is None:
         return False
+
+    cursor = None
     
     try:
         cursor = conexion.cursor()
@@ -50,7 +52,8 @@ def crear_usuario_inicial(chat_id):
         logger.error(f"Error creando usuario inicial {chat_id}: {e}")
         return False
     finally:
-        cursor.close()
+        if cursor is not None:
+            cursor.close()
         conexion.close()
 
 # Paso 2: Actualiza el email en la bd y el bot quedará esperando a la contraseña.
@@ -59,7 +62,7 @@ def actualizar_email(chat_id, email):
     conexion = obtener_conexion()
     if conexion is None:
         return False
-    
+    cursor = None
     try:
         cursor = conexion.cursor()
         query = """
@@ -74,7 +77,8 @@ def actualizar_email(chat_id, email):
         logger.error(f"Error actualizando email de {chat_id}: {e}")
         return False
     finally:
-        cursor.close()
+        if cursor is not None:
+            cursor.close()
         conexion.close()
 
 # Paso 3: El cliente introduce contraseña y finaliza el registro en BD.
@@ -83,7 +87,7 @@ def actualizar_password(chat_id, password_cifrada):
     conexion = obtener_conexion()
     if conexion is None:
         return False
-    
+    cursor = None
     try:
         cursor = conexion.cursor()
         query = """
@@ -99,7 +103,8 @@ def actualizar_password(chat_id, password_cifrada):
         logger.error(f"Error actualizando password de {chat_id}: {e}")
         return False
     finally:
-        cursor.close()
+        if cursor is not None:
+            cursor.close()
         conexion.close()
 # ------- FIN DE FUNCIONES DE GUARDADO DE USUARIOS ------------------
 
@@ -111,6 +116,7 @@ def registrar_consulta(chat_id, vin, exitosa=True):
     if conexion is None:
         logger.error("Error creando conexion: None")
         return False
+    cursor = None
     
     try:
         cursor = conexion.cursor()
@@ -126,7 +132,8 @@ def registrar_consulta(chat_id, vin, exitosa=True):
         logger.error(f"Error registrando consulta: {e}")
         return False
     finally:
-        cursor.close()
+        if cursor is not None:
+            cursor.close()
         conexion.close()
 
 
@@ -135,7 +142,7 @@ def obtener_usuario(chat_id):
     conexion = obtener_conexion()
     if conexion is None:
         return None
-    
+    cursor = None
     try:
         cursor = conexion.cursor(dictionary=True)
         query = "SELECT * FROM usuarios WHERE chat_id = %s AND activo = TRUE"
@@ -146,7 +153,8 @@ def obtener_usuario(chat_id):
         logger.error(f"Error obteniendo usuario {chat_id}: {e}")
         return None
     finally:
-        cursor.close()
+        if cursor is not None:
+            cursor.close()
         conexion.close()
 
 # Obtener estado usuario
@@ -155,7 +163,7 @@ def obtener_estado_usuario(chat_id):
     conexion = obtener_conexion()
     if conexion is None:
         return None
-
+    cursor = None
     try:
         cursor = conexion.cursor()
         query = "SELECT estado FROM usuarios WHERE chat_id = %s AND activo = TRUE"
@@ -166,5 +174,6 @@ def obtener_estado_usuario(chat_id):
         logger.error(f"Error obteniendo estado de {chat_id}: {e}")
         return None
     finally:
-        cursor.close()
+        if cursor is not None:
+            cursor.close()
         conexion.close()
