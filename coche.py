@@ -26,9 +26,9 @@ class Coche:
 📅 <b>Fecha - Producción:</b> {self.production_date}
 📅 <b>Fecha - Lanzamiento:</b> {self.delivery_date}
 🛣️ <b>Ultimos KM registrados:</b> {self.last_know_km}
-    - Fecha: 
+    - Fecha: (proximamente)
 ⚙️ <b>Motor nº:</b> {self.engine_nr}
-    - Archivos Software:
+    - Archivos Software: (proximamente)
 🔧 <b>Transmisión:</b> {self.transmision_nr}
 📡 <b>Producción iLevel:</b> {self.production_ilevel}
 📡 <b>Ultimo iLevel:</b> {self.last_know_ilevel}
@@ -36,9 +36,10 @@ class Coche:
 🧭 <b>Drive, Steering:</b> {self.drive_steering}
 🚪 <b>Body, Doors:</b> {self.body_doors}
 🎨 <b>Tapicería, Color:</b> {self.upholstery_color}
-    - Color: 
+    - Color: (proximamente)
 🔑 <b>Key System:</b> {self.key_system}
 📻 <b>Head Unit:</b> {self.headunit}
 🔢 <b>Head Unit Serial:</b> {self.headunit_serial}
-🛣️ <b>Mapa:</b>
+🛣️ <b>Mapa:</b> (proximamente)
+⚠️ <b>Campañas Tecnicas:</b> (proximamente)
 """

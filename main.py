@@ -171,11 +171,9 @@ def consultar_vin(vin, chat_id):
 
         # 7. Comprobar CarPlay
         if carplay_check(coche.headunit):
-            compatibilidad = "Si"
-        else:
-            compatibilidad = "No"
+            mensaje = str(coche) + f"\n📱<b>CarPlay:</b> Si"
 
-        mensaje = str(coche) + f"\n📱<b>CarPlay:</b> {compatibilidad}"
+        
 
         # 8. Registro de consulta en la Base de Datos
         registrar_consulta(chat_id,vin,exitosa=True)

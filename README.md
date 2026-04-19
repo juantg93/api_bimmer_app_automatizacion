@@ -32,10 +32,12 @@ Entra en la web y crea tu cuenta primero. **Este paso es obligatorio.**
 ### 2. Inicia el bot en Telegram
  
 Busca el bot en Telegram y pulsa el botón **"Iniciar bot"**.
+Nombre de usuario del bot: @bimmer_api_bot
  
 <p align="center">
   <img src="images/start_bot.jpg" alt="Pantalla de inicio del bot" width="300"/>
 </p>
+
 ### 3. Completa el registro
  
 El bot te dará la bienvenida y te pedirá tu email y tu contraseña de api.bimmer.help.  
@@ -49,6 +51,7 @@ Una vez guardadas tus credenciales, el bot te confirmará que ya puedes empezar.
 <p align="center">
   <img src="images/register_bot.jpg" alt="Registro completado" width="300"/>
 </p>
+
 ### 4. Consulta cualquier VIN
  
 Envía el VIN al chat. Puede ser el **VIN completo (17 caracteres)** o los **últimos 7 dígitos**.  
