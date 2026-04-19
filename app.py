@@ -5,9 +5,10 @@ from dataBase.database import (
     crear_usuario_inicial,
     obtener_estado_usuario,
     actualizar_email,
-    actualizar_password
+    actualizar_password,
+    obtener_usuario
 )
-from dataBase.crypto import cifrar_password
+from dataBase.crypto import cifrar_password, descifrar_password
 from messages.strings import (
     welcome_message,
     email_message,
@@ -85,7 +86,11 @@ def handler_registrado(chat_id, texto):
         )
         return
     
-    mensaje = consultar_vin(vin, chat_id)
+    usuario = obtener_usuario(chat_id)
+    email = usuario['email']
+    password = descifrar_password(usuario['password'])
+    
+    mensaje = consultar_vin(vin, chat_id, email, password)
     enviar_mensaje_sync(mensaje, chat_id)
 
 

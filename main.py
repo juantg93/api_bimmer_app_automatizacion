@@ -1,6 +1,6 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from config import id_email, id_password, USERNAME, PASS, btn_login, id_vin, btn_check, VIN_TEST
+from config import id_email, id_password, btn_login, id_vin, btn_check
 import time
 from coche import Coche
 from bot_telegram import enviar_mensaje_sync
@@ -30,21 +30,17 @@ def crear_driver():
     except Exception as e:
         print("Error creando Driver: ", e)
 
-def buscar_rellenar_campos_user_pass(driver):
-    identificadores = [(id_email, USERNAME), (id_password, PASS)]
+def buscar_rellenar_campos_user_pass(driver, email, password):
+    identificadores = [(id_email, email), (id_password, password)]
     campos_rellenados = True
 
     for campo, valor in identificadores:
         try:
-            print("Buscando campo: ", campo)
             box = driver.find_element(By.ID, campo)
-            print("Campo encontrado.")
             box.send_keys(valor)
-            print("Campo escrito correctamente")
             time.sleep(2)
         except Exception as e:
-            print("Error buscando identificador.")
-            print("Error: ", e)
+            logger.error(f"Error buscando identificadores: {e}")
             campos_rellenados = False
 
     return campos_rellenados
@@ -128,8 +124,9 @@ def obtener_datos_vehiculo(driver):
     return coche
 
 
-def consultar_vin(vin, chat_id):
+def consultar_vin(vin, chat_id, email, password):
     """Ejecuta el flujo completo de consulta de VIN."""
+    mensaje = "❌ Error desconocido procesando el VIN." 
     # 1. Confirmación de recepción
     enviar_mensaje_sync(f"✅ VIN recibido: <b>{vin}</b>\nIniciando proceso...",chat_id)
 
@@ -143,7 +140,7 @@ def consultar_vin(vin, chat_id):
     try:
         # 3. Rellenar credenciales
         enviar_mensaje_sync("🔑 Rellenando credenciales de acceso...",chat_id)
-        cubrir_campos = buscar_rellenar_campos_user_pass(driver)
+        cubrir_campos = buscar_rellenar_campos_user_pass(driver, email, password)
 
         if not cubrir_campos:
             return "❌ Error: no se han podido rellenar los campos de login."
@@ -169,9 +166,12 @@ def consultar_vin(vin, chat_id):
 
         
 
-        # 7. Comprobar CarPlay
+        # 7. Construir mensaje con la informacion del coche
+        mensaje = str(coche)
+
+        # 8. Verificacion carplay
         if carplay_check(coche.headunit):
-            mensaje = str(coche) + f"\n📱<b>CarPlay:</b> Si"
+            mensaje += f"\n📱<b>CarPlay:</b> Si"
 
         
 
