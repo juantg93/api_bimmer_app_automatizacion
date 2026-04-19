@@ -4,7 +4,6 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
 from config import id_email, id_password, btn_login, id_vin, btn_check
-import time
 from coche import Coche
 from bot_telegram import enviar_mensaje_sync
 from utils.check_carplay import carplay_check
@@ -28,11 +27,17 @@ def crear_driver():
         options.add_argument("--no-sandbox")
         options.add_argument("--disable-dev-shm-usage")
         driver_chrome = webdriver.Chrome(options=options)
+
+        # Timeouts globales del navegador
+        driver_chrome.set_page_load_timeout(30)
+        driver_chrome.set_script_timeout(30)
+
         driver_chrome.get('https://api.bimmer.help/index.php')
         print("Driver creado")
         return driver_chrome
     except Exception as e:
         print("Error creando Driver: ", e)
+        return None
 
 def buscar_rellenar_campos_user_pass(driver, email, password):
     identificadores = [(id_email, email), (id_password, password)]
@@ -42,7 +47,7 @@ def buscar_rellenar_campos_user_pass(driver, email, password):
         try:
             box = driver.find_element(By.ID, campo)
             box.send_keys(valor)
-            time.sleep(2)
+            #time.sleep(2)
         except Exception as e:
             logger.error(f"Error buscando identificadores: {e}")
             campos_rellenados = False
@@ -84,11 +89,19 @@ def click_check_vin(driver):
         print("Consultando VIN...")
         btn = driver.find_element(By.ID, btn_check)
         btn.click()
-        print("Esperando resultados...")
-        time.sleep(10)
+
+        logger.info("Esperando resultados...")
+        # Esperando a que aparezca el contenedor con los datos del vehiculo para continuar
+        WebDriverWait(driver, 20).until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, "div.mv_ci"))
+        )
+        logger.info("Resultados cargados.")
         return True
+    except TimeoutException:
+        logger.error("Timeout esperando resultados de la consulta VIN (20s)")
+        return False
     except Exception as e:
-        print("Error haciendo click en check VIN: ", e)
+        logger.error(f"Error haciendo click en check VIN:{e}")
         return False
 
 def obtener_datos_vehiculo(driver):
