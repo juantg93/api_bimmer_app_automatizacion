@@ -28,6 +28,3 @@ def enviar_broadcast(mensaje):
             enviar_mensaje_sync(mensaje, chat_id)
         except Exception as e:
             logger.error(f"Error enviando broadcast a {chat_id}: {e}")
-
-
-enviar_broadcast("Texto de prueba: 2")
