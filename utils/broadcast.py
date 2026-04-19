@@ -8,9 +8,14 @@ logger = logging.getLogger(__name__)
 # Función recuperadora de chat id para envio de broadcast.
 def enviar_broadcast(mensaje):
     """Envía un mensaje a todos los usuarios registrados."""
-    logger.info("Iniciando Broadcast")
+    logger.info("----- Iniciando Broadcast -----")
     logger.info("Iniciando conexion con BD....")
+
     conexion = obtener_conexion()
+    if conexion is None:
+        logger.error("Broadcast abortado: no se pudo conectar a la base de datos.")
+        return
+    
     cursor = conexion.cursor()
     logger.info("Conexión con BD OK")
     
