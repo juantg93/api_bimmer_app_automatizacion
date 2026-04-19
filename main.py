@@ -73,8 +73,10 @@ def click_check_vin(driver):
         btn.click()
         print("Esperando resultados...")
         time.sleep(10)
+        return True
     except Exception as e:
         print("Error haciendo click en check VIN: ", e)
+        return False
 
 def obtener_datos_vehiculo(driver):
     print("Obteniendo datos del vehículo...")
@@ -153,7 +155,8 @@ def consultar_vin(vin, chat_id, email, password):
         # 5. Introducir VIN y consultar
         if introducir_vin(driver, vin):
             enviar_mensaje_sync("⏳ Consultando base de datos BMW...", chat_id)
-            click_check_vin(driver)
+            if not click_check_vin(driver):
+                return "❌ Error al consultar el VIN en la base de datos."
 
         # 6. Obtener datos del vehículo
         try:
