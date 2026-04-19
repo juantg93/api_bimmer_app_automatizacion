@@ -17,6 +17,8 @@ from messages.strings import (
     error_message
 )
 import logging
+from config import TELEGRAM_SECRET_TOKEN
+
 # Configuración de logging
 logging.basicConfig(
     level=logging.INFO,
@@ -100,6 +102,13 @@ def handler_registrado(chat_id, texto):
 # Endpoint que recibe mensaje
 @app.route('/webhook', methods=['POST'])
 def webhook():
+    
+    # Validación de origen de solicitud: la peticion solo debe venir de Telegram
+    secret_recibido = request.headers.get('X-Telegram-Bot-Api-Secret-Token')
+    if secret_recibido != TELEGRAM_SECRET_TOKEN:
+        logger.warning(f"Webhook rechazado: secret token invalido o ausente. IP: {request.remote_addr}")
+        return jsonify({"ok": False, "error": "Forbidden"}), 403
+    
     logger.info("Solicitud en webhook")
     try:
         logger.info("Recuperando data...")
