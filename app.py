@@ -115,7 +115,7 @@ def webhook():
         texto = data['message']['text'].strip()
         logger.info("Variables guardadas.")
 
-        logger.info(f'Mensaje recibido - chat_id: {chat_id}, texto: {texto}')
+        logger.info(f'Mensaje recibido - chat_id: {chat_id}')
 
         # Enrutamiento segun el contenido  el estado del usuario
         if texto == '/start':
