@@ -1,5 +1,8 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import TimeoutException
 from config import id_email, id_password, btn_login, id_vin, btn_check
 import time
 from coche import Coche
@@ -7,6 +10,7 @@ from bot_telegram import enviar_mensaje_sync
 from utils.check_carplay import carplay_check
 from dataBase.database import registrar_consulta
 import logging
+
 
 # Configuración de logging
 logging.basicConfig(
@@ -47,13 +51,22 @@ def buscar_rellenar_campos_user_pass(driver, email, password):
 
 def login_click(driver):
     try:
-        print("Haciendo login...")
+        logger.info("Iniciando login..")
         btn = driver.find_element(By.NAME, btn_login)
         btn.click()
-        time.sleep(10)
-        print("Login OK")
+
+        # Espera hasta que aparezca el campo vin, esto indicará que el login fue exitoso.
+        WebDriverWait(driver, 15).until(
+            EC.presence_of_element_located((By.NAME, id_vin))
+        )
+        logger.info("Login OK")
+        return True
+    except TimeoutException:
+        logger.error("Login fallido: el campo VIN no aparecio tras 15s. Credenciales incorrectas o sitio caido.")
+        return False
     except Exception as e:
-        print("Error haciendo login: ", e)
+        logger.error(f"Error haciendo login: {e}")
+        return False
 
 def introducir_vin(driver, vin):
     try:
@@ -149,7 +162,9 @@ def consultar_vin(vin, chat_id, email, password):
 
         # 4. Hacer login
         enviar_mensaje_sync("🔓 Haciendo login...", chat_id)
-        login_click(driver)
+        if not login_click(driver):
+                return "❌ Error al iniciar sesión. Verifica que tus credenciales de api.bimmer.help sean correctas."
+
         enviar_mensaje_sync("✅ Login correcto. Introduciendo VIN...", chat_id)
 
         # 5. Introducir VIN y consultar
