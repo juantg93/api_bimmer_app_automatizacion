@@ -84,27 +84,32 @@ def introducir_vin(driver, vin):
         print("Error introduciendo VIN: ", e)
         return False
 
-def click_check_vin(driver):
+def click_check_vin(driver, vin):
     try:
         print("Consultando VIN...")
         btn = driver.find_element(By.ID, btn_check)
         btn.click()
 
         logger.info("Esperando resultados...")
+        vin_corto = vin[-7]
         # Esperando a que aparezca el contenedor con los datos del vehiculo para continuar
-        WebDriverWait(driver, 20).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR, "div.mv_ci"))
+
+        WebDriverWait(driver, 30).until(
+            EC.text_to_be_present_in_element(
+                (By.CSS_SELECTOR, "div.mv_ci"),
+                vin_corto
+            )
         )
         logger.info("Resultados cargados.")
         return True
     except TimeoutException:
-        logger.error("Timeout esperando resultados de la consulta VIN (20s)")
+        logger.error("Timeout esperando resultados de la consulta VIN (30s)")
         return False
     except Exception as e:
         logger.error(f"Error haciendo click en check VIN:{e}")
         return False
 
-def obtener_datos_vehiculo(driver):
+def obtener_datos_vehiculo(driver, vin_solicitado):
     print("Obteniendo datos del vehículo...")
     contenedor = driver.find_element(By.CSS_SELECTOR, "div.mv_ci")
     print("Texto contenedor: ", contenedor.text[:200])
@@ -147,6 +152,12 @@ def obtener_datos_vehiculo(driver):
             coche.headunit = valor
         elif label == "HEADUNIT SERIAL:":
             coche.headunit_serial = valor
+    
+    vin_corto_solicitado = vin_solicitado[-7]
+    if not coche.vin or vin_corto_solicitado not in coche.vin:
+        raise ValueError(
+            f"VIN devuelto ({coche.vin}) no coincide con solicitado ({vin_solicitado})"
+        )
 
     print("Coche construido.")
     return coche
@@ -183,14 +194,17 @@ def consultar_vin(vin, chat_id, email, password):
         # 5. Introducir VIN y consultar
         if introducir_vin(driver, vin):
             enviar_mensaje_sync("⏳ Consultando base de datos BMW...", chat_id)
-            if not click_check_vin(driver):
+            if not click_check_vin(driver, vin):
                 return "❌ Error al consultar el VIN en la base de datos."
 
         # 6. Obtener datos del vehículo
         try:
             logger.info("Obteniendo datos del vehículo...")
-            coche = obtener_datos_vehiculo(driver)
+            coche = obtener_datos_vehiculo(driver, vin)
             logger.info("Datos vehiculo OK")
+        except ValueError as e:
+            logger.error(f"Validación de VIN fallida: {e}")
+            return "❌ Los datos recibidos no corresponden al VIn consultado. Intentelo de nuevo."
         except Exception as e:
             logger.error(f"Error obteniendo datos del coche: {e}")
             return "❌ Error obteniendo los datos del vehículo."
