@@ -85,33 +85,39 @@ def introducir_vin(driver, vin):
         return False
 
 def click_check_vin(driver, vin):
+    vin_corto = vin[-7:]
+    xpath_query = f"//div[@class='pi' and normalize-space(text())='{vin_corto}']"
+    
     try:
-        print("Consultando VIN...")
+        logger.info("Consultando VIN...")
         btn = driver.find_element(By.ID, btn_check)
         btn.click()
 
-        logger.info("Esperando resultados...")
-        vin_corto = vin[-7]
-        # Esperando a que aparezca el contenedor con los datos del vehiculo para continuar
+        logger.info(f"Esperando a que aparezca el DVI con VIN {vin_corto}")
+        logger.debug(f"XPath usado: {xpath_query}")  # útil para diagnóstico
 
         WebDriverWait(driver, 30).until(
-            EC.text_to_be_present_in_element(
-                (By.CSS_SELECTOR, "div.mv_ci"),
-                vin_corto
-            )
+            EC.presence_of_element_located((By.XPATH, xpath_query))
         )
-        logger.info("Resultados cargados.")
+        logger.info(f"Resultados cargados para VIN {vin_corto}")
         return True
+
     except TimeoutException:
-        logger.error("Timeout esperando resultados de la consulta VIN (30s)")
+        logger.error(f"Timeout esperando resultados del VIN {vin} (30s)")
         return False
     except Exception as e:
-        logger.error(f"Error haciendo click en check VIN:{e}")
+        logger.error(f"Error haciendo click en check VIN ({type(e).__name__}): {e}")
+        logger.error(f"XPath que se intentó usar: {xpath_query}")
         return False
 
 def obtener_datos_vehiculo(driver, vin_solicitado):
     print("Obteniendo datos del vehículo...")
-    contenedor = driver.find_element(By.CSS_SELECTOR, "div.mv_ci")
+    vin_corto = vin_solicitado[-7:]
+    contenedor = driver.find_element(
+        By.XPATH,
+        f"//div[@class='mv_ci'][.//div[@class='pi' and normalize-space(text())='{vin_corto}']]"
+    )
+
     print("Texto contenedor: ", contenedor.text[:200])
     campos = contenedor.find_elements(By.CSS_SELECTOR, "div.ci_l")
 
