@@ -2,12 +2,13 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import TimeoutException
+from selenium.common.exceptions import TimeoutException, NoSuchElementException
 from config import id_email, id_password, btn_login, id_vin, btn_check
 from coche import Coche
 from bot_telegram import enviar_mensaje_sync
 from utils.check_carplay import carplay_check
 from dataBase.database import registrar_consulta
+from utils.extractores import *
 import logging
 
 
@@ -167,6 +168,10 @@ def obtener_datos_vehiculo(driver, vin_solicitado):
     contenedor = buscar_contenedor(driver, vin_solicitado)
     coche = Coche()
     extraer_campos_simples(contenedor, coche)
+    extraer_fecha_km(contenedor, coche)
+    extraer_color_texto(contenedor, coche)
+    extraer_archivos_software(contenedor, coche)
+    extraer_mapa_navegacion(driver, vin_solicitado, coche)
 
     # Validacion defensiva: Comprueba que el vin devuelto sea el solicitado.
     vin_corto = vin_solicitado[-7:]
