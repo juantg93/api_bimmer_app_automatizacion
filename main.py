@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 def crear_driver():
     """Creación del driver"""
     try:
-        print("Creando driver...")
+        logger.info("Creando driver...")
         options = webdriver.ChromeOptions()
         options.add_argument("--headless")
         options.add_argument("--no-sandbox")
@@ -33,10 +33,10 @@ def crear_driver():
         driver_chrome.set_script_timeout(30)
 
         driver_chrome.get('https://api.bimmer.help/index.php')
-        print("Driver creado")
+        logger.info("Driver creado")
         return driver_chrome
     except Exception as e:
-        print("Error creando Driver: ", e)
+        logger.error("Error creando Driver: ", e)
         return None
 
 def buscar_rellenar_campos_user_pass(driver, email, password):
@@ -75,13 +75,11 @@ def login_click(driver):
 
 def introducir_vin(driver, vin):
     try:
-        print("Buscando casilla vin...")
         casilla_vin = driver.find_element(By.NAME, id_vin)
         casilla_vin.send_keys(vin)
-        print("VIN escrito")
         return True
     except Exception as e:
-        print("Error introduciendo VIN: ", e)
+        logger.error("Error introduciendo VIN: ", e)
         return False
 
 def click_check_vin(driver, vin):
@@ -111,14 +109,12 @@ def click_check_vin(driver, vin):
         return False
 
 def obtener_datos_vehiculo(driver, vin_solicitado):
-    print("Obteniendo datos del vehículo...")
     vin_corto = vin_solicitado[-7:]
     contenedor = driver.find_element(
         By.XPATH,
         f"//div[@class='mv_ci'][.//div[@class='pi' and normalize-space(text())='{vin_corto}']]"
     )
 
-    print("Texto contenedor: ", contenedor.text[:200])
     campos = contenedor.find_elements(By.CSS_SELECTOR, "div.ci_l")
 
     coche = Coche()
@@ -165,7 +161,7 @@ def obtener_datos_vehiculo(driver, vin_solicitado):
             f"VIN devuelto ({coche.vin}) no coincide con solicitado ({vin_solicitado})"
         )
 
-    print("Coche construido.")
+    logger.info("Coche construido.")
     return coche
 
 
