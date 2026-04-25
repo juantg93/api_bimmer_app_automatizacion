@@ -108,16 +108,22 @@ def click_check_vin(driver, vin):
         logger.error(f"XPath que se intentó usar: {xpath_query}")
         return False
 
-def obtener_datos_vehiculo(driver, vin_solicitado):
+def buscar_contenedor(driver, vin_solicitado):
+    """Encuentra el contenedor div.mv_ci correspondiente con el vin solicitado.
+    Importante: La web guarda otros vin, buscar el que tiene el vin correcto
+    """
     vin_corto = vin_solicitado[-7:]
     contenedor = driver.find_element(
         By.XPATH,
         f"//div[@class='mv_ci'][.//div[@class='pi' and normalize-space(text())='{vin_corto}']]"
     )
+    logger.info(f"Contenedor encontrado para VIN {vin_corto}")
+    return contenedor
 
+def extraer_campos_simples(contenedor, coche):
+    """Extrae los campos que se obtienen directamente del texto de div.pi."""
     campos = contenedor.find_elements(By.CSS_SELECTOR, "div.ci_l")
-
-    coche = Coche()
+    
     for campo in campos:
         label = campo.find_element(By.CSS_SELECTOR, "div.pn").text.strip()
         valor = campo.find_element(By.CSS_SELECTOR, "div.pi").text.strip()
@@ -154,16 +160,22 @@ def obtener_datos_vehiculo(driver, vin_solicitado):
             coche.headunit = valor
         elif label == "HEADUNIT SERIAL:":
             coche.headunit_serial = valor
-    
-    vin_corto_solicitado = vin_solicitado[-7]
-    if not coche.vin or vin_corto_solicitado not in coche.vin:
-        raise ValueError(
-            f"VIN devuelto ({coche.vin}) no coincide con solicitado ({vin_solicitado})"
-        )
 
+def obtener_datos_vehiculo(driver, vin_solicitado):
+    """Construye el objeto coche extrayendo datos del DVI"""
+    logger.info("Obetiendo datos del vehiculo...")
+    contenedor = buscar_contenedor(driver, vin_solicitado)
+    coche = Coche()
+    extraer_campos_simples(contenedor, coche)
+
+    # Validacion defensiva: Comprueba que el vin devuelto sea el solicitado.
+    vin_corto = vin_solicitado[-7:]
+    if not coche.vin or vin_corto not in coche.vin:
+        raise ValueError(
+            f"VIN devuelto ({coche.vin}) no coincide con el solicitado({vin_solicitado})"
+        )
     logger.info("Coche construido.")
     return coche
-
 
 def consultar_vin(vin, chat_id, email, password):
     """Ejecuta el flujo completo de consulta de VIN."""
